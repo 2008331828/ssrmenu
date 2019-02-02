@@ -175,6 +175,121 @@ Get_User_info(){
 }
 
 
+Get_User_transfer(){
+	transfer_port=$1
+	#echo "transfer_port=${transfer_port}"
+	all_port=$(${jq_file} '.[]|.port' ${config_user_mudb_file})
+	#echo "all_port=${all_port}"
+	port_num=$(echo "${all_port}"|grep -nw "${transfer_port}"|awk -F ":" '{print $1}')
+	#echo "port_num=${port_num}"
+	port_num_1=$(expr ${port_num} - 1)
+	#echo "port_num_1=${port_num_1}"
+	transfer_enable_1=$(${jq_file} ".[${port_num_1}].transfer_enable" ${config_user_mudb_file})
+	#echo "transfer_enable_1=${transfer_enable_1}"
+	u_1=$(${jq_file} ".[${port_num_1}].u" ${config_user_mudb_file})
+	#echo "u_1=${u_1}"
+	d_1=$(${jq_file} ".[${port_num_1}].d" ${config_user_mudb_file})
+	#echo "d_1=${d_1}"
+	transfer_enable_Used_2_1=$(expr ${u_1} + ${d_1})
+	#echo "transfer_enable_Used_2_1=${transfer_enable_Used_2_1}"
+	transfer_enable_Used_1=$(expr ${transfer_enable_1} - ${transfer_enable_Used_2_1})
+	#echo "transfer_enable_Used_1=${transfer_enable_Used_1}"
+	
+	
+	if [[ ${transfer_enable_1} -lt 1024 ]]; then
+		transfer_enable="${transfer_enable_1} B"
+	elif [[ ${transfer_enable_1} -lt 1048576 ]]; then
+		transfer_enable=$(awk 'BEGIN{printf "%.2f\n",'${transfer_enable_1}'/'1024'}')
+		transfer_enable="${transfer_enable} KB"
+	elif [[ ${transfer_enable_1} -lt 1073741824 ]]; then
+		transfer_enable=$(awk 'BEGIN{printf "%.2f\n",'${transfer_enable_1}'/'1048576'}')
+		transfer_enable="${transfer_enable} MB"
+	elif [[ ${transfer_enable_1} -lt 1099511627776 ]]; then
+		transfer_enable=$(awk 'BEGIN{printf "%.2f\n",'${transfer_enable_1}'/'1073741824'}')
+		transfer_enable="${transfer_enable} GB"
+	elif [[ ${transfer_enable_1} -lt 1125899906842624 ]]; then
+		transfer_enable=$(awk 'BEGIN{printf "%.2f\n",'${transfer_enable_1}'/'1099511627776'}')
+		transfer_enable="${transfer_enable} TB"
+	fi
+	#echo "transfer_enable=${transfer_enable}"
+	if [[ ${u_1} -lt 1024 ]]; then
+		u="${u_1} B"
+	elif [[ ${u_1} -lt 1048576 ]]; then
+		u=$(awk 'BEGIN{printf "%.2f\n",'${u_1}'/'1024'}')
+		u="${u} KB"
+	elif [[ ${u_1} -lt 1073741824 ]]; then
+		u=$(awk 'BEGIN{printf "%.2f\n",'${u_1}'/'1048576'}')
+		u="${u} MB"
+	elif [[ ${u_1} -lt 1099511627776 ]]; then
+		u=$(awk 'BEGIN{printf "%.2f\n",'${u_1}'/'1073741824'}')
+		u="${u} GB"
+	elif [[ ${u_1} -lt 1125899906842624 ]]; then
+		u=$(awk 'BEGIN{printf "%.2f\n",'${u_1}'/'1099511627776'}')
+		u="${u} TB"
+	fi
+	#echo "u=${u}"
+	if [[ ${d_1} -lt 1024 ]]; then
+		d="${d_1} B"
+	elif [[ ${d_1} -lt 1048576 ]]; then
+		d=$(awk 'BEGIN{printf "%.2f\n",'${d_1}'/'1024'}')
+		d="${d} KB"
+	elif [[ ${d_1} -lt 1073741824 ]]; then
+		d=$(awk 'BEGIN{printf "%.2f\n",'${d_1}'/'1048576'}')
+		d="${d} MB"
+	elif [[ ${d_1} -lt 1099511627776 ]]; then
+		d=$(awk 'BEGIN{printf "%.2f\n",'${d_1}'/'1073741824'}')
+		d="${d} GB"
+	elif [[ ${d_1} -lt 1125899906842624 ]]; then
+		d=$(awk 'BEGIN{printf "%.2f\n",'${d_1}'/'1099511627776'}')
+		d="${d} TB"
+	fi
+	#echo "d=${d}"
+	if [[ ${transfer_enable_Used_1} -lt 1024 ]]; then
+		transfer_enable_Used="${transfer_enable_Used_1} B"
+	elif [[ ${transfer_enable_Used_1} -lt 1048576 ]]; then
+		transfer_enable_Used=$(awk 'BEGIN{printf "%.2f\n",'${transfer_enable_Used_1}'/'1024'}')
+		transfer_enable_Used="${transfer_enable_Used} KB"
+	elif [[ ${transfer_enable_Used_1} -lt 1073741824 ]]; then
+		transfer_enable_Used=$(awk 'BEGIN{printf "%.2f\n",'${transfer_enable_Used_1}'/'1048576'}')
+		transfer_enable_Used="${transfer_enable_Used} MB"
+	elif [[ ${transfer_enable_Used_1} -lt 1099511627776 ]]; then
+		transfer_enable_Used=$(awk 'BEGIN{printf "%.2f\n",'${transfer_enable_Used_1}'/'1073741824'}')
+		transfer_enable_Used="${transfer_enable_Used} GB"
+	elif [[ ${transfer_enable_Used_1} -lt 1125899906842624 ]]; then
+		transfer_enable_Used=$(awk 'BEGIN{printf "%.2f\n",'${transfer_enable_Used_1}'/'1099511627776'}')
+		transfer_enable_Used="${transfer_enable_Used} TB"
+	fi
+	#echo "transfer_enable_Used=${transfer_enable_Used}"
+	if [[ ${transfer_enable_Used_2_1} -lt 1024 ]]; then
+		transfer_enable_Used_2="${transfer_enable_Used_2_1} B"
+	elif [[ ${transfer_enable_Used_2_1} -lt 1048576 ]]; then
+		transfer_enable_Used_2=$(awk 'BEGIN{printf "%.2f\n",'${transfer_enable_Used_2_1}'/'1024'}')
+		transfer_enable_Used_2="${transfer_enable_Used_2} KB"
+	elif [[ ${transfer_enable_Used_2_1} -lt 1073741824 ]]; then
+		transfer_enable_Used_2=$(awk 'BEGIN{printf "%.2f\n",'${transfer_enable_Used_2_1}'/'1048576'}')
+		transfer_enable_Used_2="${transfer_enable_Used_2} MB"
+	elif [[ ${transfer_enable_Used_2_1} -lt 1099511627776 ]]; then
+		transfer_enable_Used_2=$(awk 'BEGIN{printf "%.2f\n",'${transfer_enable_Used_2_1}'/'1073741824'}')
+		transfer_enable_Used_2="${transfer_enable_Used_2} GB"
+	elif [[ ${transfer_enable_Used_2_1} -lt 1125899906842624 ]]; then
+		transfer_enable_Used_2=$(awk 'BEGIN{printf "%.2f\n",'${transfer_enable_Used_2_1}'/'1099511627776'}')
+		transfer_enable_Used_2="${transfer_enable_Used_2} TB"
+	fi
+	#echo "transfer_enable_Used_2=${transfer_enable_Used_2}"
+}
+
+urlsafe_base64(){
+	date=$(echo -n "$1"|base64|sed ':a;N;s/\n/ /g;ta'|sed 's/ //g;s/=//g;s/+/-/g;s/\//_/g')
+	echo -e "${date}"
+}
+
+ss_link_qr(){
+	SSbase64=$(urlsafe_base64 "${method}:${password}@${ip}:${port}")
+	SSurl="ss://${SSbase64}"
+	SSQRcode="https://makeai.cn/qr/?m=2&e=H&p=3&url=${SSurl}"
+	ss_link=" SS    链接 : ${Green_font_prefix}${SSurl}${Font_color_suffix} \n SS  二维码 : ${Green_font_prefix}${SSQRcode}${Font_color_suffix}"
+}
+
 
 
 
