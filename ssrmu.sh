@@ -602,6 +602,35 @@ Set_config_speed_limit_per_user(){
 
 
 
+Set_config_transfer(){
+	while true
+	do
+	echo
+	echo -e "请输入要设置的用户 可使用的总流量上限(单位: GB, 1-999999 GB)"
+	stty erase '^H' && read -p "(默认: 无限):" ssr_transfer
+	[[ -z "$ssr_transfer" ]] && ssr_transfer="999999" && echo && break
+	expr ${ssr_transfer} + 0 &>/dev/null
+	if [[ $? == 0 ]]; then
+		if [[ ${ssr_transfer} -ge 1 ]] && [[ ${ssr_transfer} -le 999999 ]]; then
+			echo && echo ${Separator_1} && echo -e "	用户总流量 : ${Green_font_prefix}${ssr_transfer} GB${Font_color_suffix}" && echo ${Separator_1} && echo
+			break
+		else
+			echo -e "${Error} 请输入正确的数字(1-999999)"
+		fi
+	else
+		echo -e "${Error} 请输入正确的数字(1-999999)"
+	fi
+	done
+}
+
+
+Set_config_forbid(){
+	echo "请输入要设置的用户 禁止访问的端口"
+	echo -e "${Tip} 禁止的端口：例如不允许访问 25端口，用户就无法通过SSR代理访问 邮件端口25了，如果禁止了 80,443 那么用户将无法正常访问 http/https 网站。"
+	stty erase '^H' && read -p "(默认为空 不禁止访问任何端口):" ssr_forbid
+	[[ -z "${ssr_forbid}" ]] && ssr_forbid=""
+	echo && echo ${Separator_1} && echo -e "	禁止的端口 : ${Green_font_prefix}${ssr_forbid}${Font_color_suffix}" && echo ${Separator_1} && echo
+}
 
 
 
@@ -611,6 +640,445 @@ Set_config_speed_limit_per_user(){
 
 
 
+
+
+
+
+
+Set_config_enable(){
+	user_total=$(expr ${user_total} - 1)
+	for((integer = 0; integer <= ${user_total}; integer++))
+	do
+		echo -e "integer=${integer}"
+		port_jq=$(${jq_file} ".[${integer}].port" "${config_user_mudb_file}")
+		echo -e "port_jq=${port_jq}"
+		if [[ "${ssr_port}" == "${port_jq}" ]]; then
+			enable=$(${jq_file} ".[${integer}].enable" "${config_user_mudb_file}")
+			echo -e "enable=${enable}"
+			[[ "${enable}" == "null" ]] && echo -e "${Error} 获取当前端口[${ssr_port}]的禁用状态失败 !" && exit 1
+			ssr_port_num=$(cat "${config_user_mudb_file}"|grep -n '"port": '${ssr_port}','|awk -F ":" '{print $1}')
+			echo -e "ssr_port_num=${ssr_port_num}"
+			[[ "${ssr_port_num}" == "null" ]] && echo -e "${Error} 获取当前端口[${ssr_port}]的行数失败 !" && exit 1
+			ssr_enable_num=$(expr ${ssr_port_num} - 5)
+			echo -e "ssr_enable_num=${ssr_enable_num}"
+			break
+		fi
+	done
+	if [[ "${enable}" == "1" ]]; then
+		echo -e "端口 [${ssr_port}] 的账号状态为：${Green_font_prefix}启用${Font_color_suffix} , 是否切换为 ${Red_font_prefix}禁用${Font_color_suffix} ?[Y/n]"
+		stty erase '^H' && read -p "(默认: Y):" ssr_enable_yn
+		[[ -z "${ssr_enable_yn}" ]] && ssr_enable_yn="y"
+		if [[ "${ssr_enable_yn}" == [Yy] ]]; then
+			ssr_enable="0"
+		else
+			echo "取消..." && exit 0
+		fi
+	elif [[ "${enable}" == "0" ]]; then
+		echo -e "端口 [${ssr_port}] 的账号状态为：${Green_font_prefix}禁用${Font_color_suffix} , 是否切换为 ${Red_font_prefix}启用${Font_color_suffix} ?[Y/n]"
+		stty erase '^H' && read -p "(默认: Y):" ssr_enable_yn
+		[[ -z "${ssr_enable_yn}" ]] && ssr_enable_yn = "y"
+		if [[ "${ssr_enable_yn}" == [Yy] ]]; then
+			ssr_enable="1"
+		else
+			echo "取消..." && exit 0
+		fi
+	else
+		echo -e "${Error} 当前端口的禁用状态异常[${enable}] !" && exit 1
+	fi
+}
+Set_user_api_server_pub_addr(){
+	addr=$1
+	if [[ "${addr}" == "Modify" ]]; then
+		server_pub_addr=$(cat ${config_user_api_file}|grep "SERVER_PUB_ADDR = "|awk -F "\'" '{print $2}')
+		if [[ -z ${server_pub_addr} ]]; then
+			echo -e "${Error} 获取当前配置的 服务器IP或域名失败！" && exit 1
+		else
+			echo -e "${Info} 当前配置的服务器IP或域名为： ${Green_font_prefix}${server_pub_addr}${Font_color_suffix}"
+		fi
+	fi
+	echo "请输入用户配置中要显示的 服务器IP或域名 (当服务器有多个IP时，可以指定用户配置中显示的IP或者域名)"
+	stty erase '^H' && read -p "(默认自动检测外网IP):" ssr_server_pub_addr
+	if [[ -z "${ssr_server_pub_addr}" ]]; then
+		Get_IP
+		if [[ ${ip} == "VPS_IP" ]]; then
+			while true
+			do
+			stty erase '^H' && read -p "${Error} 自动检测外网IP失败，请手动输入服务器IP或域名" ssr_server_pub_addr
+			if [[ -z "$ssr_server_pub_addr" ]]; then
+				echo -e "${Error} 不能为空！"
+			else
+				break
+			fi
+			done
+		else
+			ssr_server_pub_addr="${ip}"
+		fi
+	fi
+	echo && echo ${Separator_1} && echo -e "	IP或域名 : ${Green_font_prefix}${ssr_server_pub_addr}${Font_color_suffix}" && echo ${Separator_1} && echo
+}
+
+
+Set_config_all(){
+	lal=$1
+	if [[ "${lal}" == "Modify" ]]; then
+		Set_config_password
+		Set_config_method
+		Set_config_protocol
+		Set_config_obfs
+		Set_config_protocol_param
+		Set_config_speed_limit_per_con
+		Set_config_speed_limit_per_user
+		Set_config_transfer
+		Set_config_forbid
+	else
+		Set_config_user
+		Set_config_port
+		Set_config_password
+		Set_config_method
+		Set_config_protocol
+		Set_config_obfs
+		Set_config_protocol_param
+		Set_config_speed_limit_per_con
+		Set_config_speed_limit_per_user
+		Set_config_transfer
+		Set_config_forbid
+	fi
+}
+
+# 修改 配置信息
+Modify_config_password(){
+	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -k "${ssr_password}"|grep -w "edit user ")
+	if [[ -z "${match_edit}" ]]; then
+		echo -e "${Error} 用户修改失败 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} " && exit 1
+	else
+		echo -e "${Info} 用户修改成功 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} (注意：可能需要十秒左右才会应用最新配置)"
+	fi
+}
+
+
+Modify_config_method(){
+	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -m "${ssr_method}"|grep -w "edit user ")
+	if [[ -z "${match_edit}" ]]; then
+		echo -e "${Error} 用户修改失败 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} " && exit 1
+	else
+		echo -e "${Info} 用户修改成功 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} (注意：可能需要十秒左右才会应用最新配置)"
+	fi
+}
+
+
+Modify_config_protocol(){
+	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -O "${ssr_protocol}"|grep -w "edit user ")
+	if [[ -z "${match_edit}" ]]; then
+		echo -e "${Error} 用户修改失败 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} " && exit 1
+	else
+		echo -e "${Info} 用户修改成功 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} (注意：可能需要十秒左右才会应用最新配置)"
+	fi
+}
+
+
+Modify_config_obfs(){
+	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -o "${ssr_obfs}"|grep -w "edit user ")
+	if [[ -z "${match_edit}" ]]; then
+		echo -e "${Error} 用户修改失败 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} " && exit 1
+	else
+		echo -e "${Info} 用户修改成功 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} (注意：可能需要十秒左右才会应用最新配置)"
+	fi
+}
+
+
+Modify_config_protocol_param(){
+	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -G "${ssr_protocol_param}"|grep -w "edit user ")
+	if [[ -z "${match_edit}" ]]; then
+		echo -e "${Error} 用户修改失败 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} " && exit 1
+	else
+		echo -e "${Info} 用户修改成功 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} (注意：可能需要十秒左右才会应用最新配置)"
+	fi
+}
+
+
+Modify_config_speed_limit_per_con(){
+	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -s "${ssr_speed_limit_per_con}"|grep -w "edit user ")
+	if [[ -z "${match_edit}" ]]; then
+		echo -e "${Error} 用户修改失败 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} " && exit 1
+	else
+		echo -e "${Info} 用户修改成功 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} (注意：可能需要十秒左右才会应用最新配置)"
+	fi
+}
+
+
+Modify_config_speed_limit_per_user(){
+	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -S "${ssr_speed_limit_per_user}"|grep -w "edit user ")
+	if [[ -z "${match_edit}" ]]; then
+		echo -e "${Error} 用户修改失败 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} " && exit 1
+	else
+		echo -e "${Info} 用户修改成功 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} (注意：可能需要十秒左右才会应用最新配置)"
+	fi
+}
+
+
+Modify_config_connect_verbose_info(){
+	sed -i 's/"connect_verbose_info": '"$(echo ${connect_verbose_info})"',/"connect_verbose_info": '"$(echo ${ssr_connect_verbose_info})"',/g' ${config_user_file}
+}
+
+
+Modify_config_transfer(){
+	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -t "${ssr_transfer}"|grep -w "edit user ")
+	if [[ -z "${match_edit}" ]]; then
+		echo -e "${Error} 用户修改失败 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} " && exit 1
+	else
+		echo -e "${Info} 用户修改成功 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} (注意：可能需要十秒左右才会应用最新配置)"
+	fi
+}
+
+
+Modify_config_forbid(){
+	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -f "${ssr_forbid}"|grep -w "edit user ")
+	if [[ -z "${match_edit}" ]]; then
+		echo -e "${Error} 用户修改失败 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} " && exit 1
+	else
+		echo -e "${Info} 用户修改成功 ${Green_font_prefix}[端口: ${ssr_port}]${Font_color_suffix} (注意：可能需要十秒左右才会应用最新配置)"
+	fi
+}
+
+
+Modify_config_enable(){
+	sed -i "${ssr_enable_num}"'s/"enable": '"$(echo ${enable})"',/"enable": '"$(echo ${ssr_enable})"',/' ${config_user_mudb_file}
+}
+
+
+Modify_user_api_server_pub_addr(){
+	sed -i "s/SERVER_PUB_ADDR = '${server_pub_addr}'/SERVER_PUB_ADDR = '${ssr_server_pub_addr}'/" ${config_user_api_file}
+}
+
+
+Modify_config_all(){
+	Modify_config_password
+	Modify_config_method
+	Modify_config_protocol
+	Modify_config_obfs
+	Modify_config_protocol_param
+	Modify_config_speed_limit_per_con
+	Modify_config_speed_limit_per_user
+	Modify_config_transfer
+	Modify_config_forbid
+}
+
+Check_python(){
+	python_ver=`python -h`
+	if [[ -z ${python_ver} ]]; then
+		echo -e "${Info} 没有安装Python，开始安装..."
+		if [[ ${release} == "centos" ]]; then
+			yum install -y python
+		else
+			apt-get install -y python
+		fi
+	fi
+}
+
+
+Centos_yum(){
+	yum update
+	cat /etc/redhat-release |grep 7\..*|grep -i centos>/dev/null
+	if [[ $? = 0 ]]; then
+		yum install -y vim git crond net-tools
+	else
+		yum install -y vim git crond
+	fi
+}
+
+
+Debian_apt(){
+	apt-get update
+	apt-get install -y vim git cron
+}
+
+
+
+
+
+
+
+
+# 下载 ShadowsocksR
+Download_SSR(){
+	cd "/usr/local"
+	#git config --global http.sslVerify false
+	env GIT_SSL_NO_VERIFY=true git clone -b manyuser https://github.com/makedary/shadowsocksr.git
+	[[ ! -e ${ssr_folder} ]] && echo -e "${Error} ShadowsocksR服务端 下载失败 !" && exit 1
+	cd "shadowsocksr"
+	cp "${ssr_folder}/config.json" "${config_user_file}"
+	cp "${ssr_folder}/mysql.json" "${ssr_folder}/usermysql.json"
+	cp "${ssr_folder}/apiconfig.py" "${config_user_api_file}"
+	[[ ! -e ${config_user_api_file} ]] && echo -e "${Error} ShadowsocksR服务端 apiconfig.py 复制失败 !" && exit 1
+	sed -i "s/API_INTERFACE = 'sspanelv2'/API_INTERFACE = 'mudbjson'/" ${config_user_api_file}
+	server_pub_addr="127.0.0.1"
+	Modify_user_api_server_pub_addr
+	#sed -i "s/SERVER_PUB_ADDR = '127.0.0.1'/SERVER_PUB_ADDR = '${ip}'/" ${config_user_api_file}
+	sed -i 's/ \/\/ only works under multi-user mode//g' "${config_user_file}"
+	echo -e "${Info} ShadowsocksR服务端 下载完成 !"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+# 下载 ShadowsocksR
+Download_SSR(){
+	cd "/usr/local"
+	#git config --global http.sslVerify false
+	env GIT_SSL_NO_VERIFY=true git clone -b manyuser https://github.com/makedary/shadowsocksr.git
+	[[ ! -e ${ssr_folder} ]] && echo -e "${Error} ShadowsocksR服务端 下载失败 !" && exit 1
+	cd "shadowsocksr"
+	cp "${ssr_folder}/config.json" "${config_user_file}"
+	cp "${ssr_folder}/mysql.json" "${ssr_folder}/usermysql.json"
+	cp "${ssr_folder}/apiconfig.py" "${config_user_api_file}"
+	[[ ! -e ${config_user_api_file} ]] && echo -e "${Error} ShadowsocksR服务端 apiconfig.py 复制失败 !" && exit 1
+	sed -i "s/API_INTERFACE = 'sspanelv2'/API_INTERFACE = 'mudbjson'/" ${config_user_api_file}
+	server_pub_addr="127.0.0.1"
+	Modify_user_api_server_pub_addr
+	#sed -i "s/SERVER_PUB_ADDR = '127.0.0.1'/SERVER_PUB_ADDR = '${ip}'/" ${config_user_api_file}
+	sed -i 's/ \/\/ only works under multi-user mode//g' "${config_user_file}"
+	echo -e "${Info} ShadowsocksR服务端 下载完成 !"
+}
+Service_SSR(){
+	if [[ ${release} = "centos" ]]; then
+		if ! wget --no-check-certificate https://raw.githubusercontent.com/makedary/bbaaz/master/other/ssrmu_centos -O /etc/init.d/ssrmu; then
+			echo -e "${Error} ShadowsocksR服务 管理脚本下载失败 !" && exit 1
+		fi
+		chmod +x /etc/init.d/ssrmu
+		chkconfig --add ssrmu
+		chkconfig ssrmu on
+	else
+		if ! wget --no-check-certificate https://raw.githubusercontent.com/makedary/bbaaz/master/other/ssrmu_debian -O /etc/init.d/ssrmu; then
+			echo -e "${Error} ShadowsocksR服务 管理脚本下载失败 !" && exit 1
+		fi
+		chmod +x /etc/init.d/ssrmu
+		update-rc.d -f ssrmu defaults
+	fi
+	echo -e "${Info} ShadowsocksR服务 管理脚本下载完成 !"
+}
+
+
+
+
+
+# 安装 JQ解析器
+JQ_install(){
+	if [[ ! -e ${jq_file} ]]; then
+		if [[ ${bit} = "x86_64" ]]; then
+			wget --no-check-certificate "https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64" -O ${jq_file}
+		else
+			wget --no-check-certificate "https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux32" -O ${jq_file}
+		fi
+		[[ ! -e ${jq_file} ]] && echo -e "${Error} JQ解析器 下载失败，请检查 !" && exit 1
+		chmod +x ${jq_file}
+		echo -e "${Info} JQ解析器 安装完成，继续..." 
+	else
+		echo -e "${Info} JQ解析器 已安装，继续..."
+	fi
+}
+
+
+
+
+# 安装 依赖
+Installation_dependency(){
+	if [[ ${release} == "centos" ]]; then
+		Centos_yum
+	else
+		Debian_apt
+	fi
+	[[ ! -e "/usr/bin/git" ]] && echo -e "${Error} 依赖 Git 安装失败，多半是软件包源的问题，请检查 !" && exit 1
+	Check_python
+	#echo "nameserver 8.8.8.8" > /etc/resolv.conf
+	#echo "nameserver 8.8.4.4" >> /etc/resolv.conf
+	cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+	if [[ ${release} == "centos" ]]; then
+		/etc/init.d/crond restart
+	else
+		/etc/init.d/cron restart
+	fi
+}
+
+
+
+Install_SSR(){
+	check_root
+	[[ -e ${ssr_folder} ]] && echo -e "${Error} ShadowsocksR 文件夹已存在，请检查( 如安装失败或者存在旧版本，请先卸载 ) !" && exit 1
+	echo -e "${Info} 开始设置 ShadowsocksR账号配置..."
+	Set_user_api_server_pub_addr
+	Set_config_all
+	echo -e "${Info} 开始安装/配置 ShadowsocksR依赖..."
+	Installation_dependency
+	echo -e "${Info} 开始下载/安装 ShadowsocksR文件..."
+	Download_SSR
+	echo -e "${Info} 开始下载/安装 ShadowsocksR服务脚本(init)..."
+	Service_SSR
+	echo -e "${Info} 开始下载/安装 JSNO解析器 JQ..."
+	JQ_install
+	echo -e "${Info} 开始添加初始用户..."
+	Add_port_user "install"
+	echo -e "${Info} 开始设置 iptables防火墙..."
+	Set_iptables
+	echo -e "${Info} 开始添加 iptables防火墙规则..."
+	Add_iptables
+	echo -e "${Info} 开始保存 iptables防火墙规则..."
+	Save_iptables
+	echo -e "${Info} 所有步骤 安装完毕，开始启动 ShadowsocksR服务端..."
+	Start_SSR
+	Get_User_info "${ssr_port}"
+	View_User_info
+}
+
+
+Update_SSR(){
+	SSR_installation_status
+	echo -e "因破娃暂停更新ShadowsocksR服务端，所以此功能临时禁用。"
+	#cd ${ssr_folder}
+	#git pull
+	#Restart_SSR
+}
+
+
+
+Uninstall_SSR(){
+	[[ ! -e ${ssr_folder} ]] && echo -e "${Error} 没有安装 ShadowsocksR，请检查 !" && exit 1
+	echo "确定要 卸载ShadowsocksR？[y/N]" && echo
+	stty erase '^H' && read -p "(默认: n):" unyn
+	[[ -z ${unyn} ]] && unyn="n"
+	if [[ ${unyn} == [Yy] ]]; then
+		check_pid
+		[[ ! -z "${PID}" ]] && kill -9 ${PID}
+		user_info=$(python mujson_mgr.py -l)
+		user_total=$(echo "${user_info}"|wc -l)
+		if [[ ! -z ${user_info} ]]; then
+			for((integer = 1; integer <= ${user_total}; integer++))
+			do
+				port=$(echo "${user_info}"|sed -n "${integer}p"|awk '{print $4}')
+				Del_iptables
+			done
+		fi
+		if [[ ${release} = "centos" ]]; then
+			chkconfig --del ssrmu
+		else
+			update-rc.d -f ssrmu remove
+		fi
+		rm -rf ${ssr_folder} && rm -rf /etc/init.d/ssrmu
+		echo && echo " ShadowsocksR 卸载完成 !" && echo
+	else
+		echo && echo " 卸载已取消..." && echo
+	fi
+}
+
+
+	
 
 
 
