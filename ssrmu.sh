@@ -290,6 +290,325 @@ ss_link_qr(){
 	ss_link=" SS    链接 : ${Green_font_prefix}${SSurl}${Font_color_suffix} \n SS  二维码 : ${Green_font_prefix}${SSQRcode}${Font_color_suffix}"
 }
 
+ssr_link_qr(){
+	SSRprotocol=$(echo ${protocol} | sed 's/_compatible//g')
+	SSRobfs=$(echo ${obfs} | sed 's/_compatible//g')
+	SSRPWDbase64=$(urlsafe_base64 "${password}")
+	SSRbase64=$(urlsafe_base64 "${ip}:${port}:${SSRprotocol}:${method}:${SSRobfs}:${SSRPWDbase64}")
+	SSRurl="ssr://${SSRbase64}"
+	SSRQRcode="https://makeai.cn/qr/?m=2&e=H&p=3&url=${SSRurl}"
+	ssr_link=" SSR   链接 : ${Red_font_prefix}${SSRurl}${Font_color_suffix} \n SSR 二维码 : ${Red_font_prefix}${SSRQRcode}${Font_color_suffix} \n "
+}
+
+ss_ssr_determine(){
+	protocol_suffix=`echo ${protocol} | awk -F "_" '{print $NF}'`
+	obfs_suffix=`echo ${obfs} | awk -F "_" '{print $NF}'`
+	if [[ ${protocol} = "origin" ]]; then
+		if [[ ${obfs} = "plain" ]]; then
+			ss_link_qr
+			ssr_link=""
+		else
+			if [[ ${obfs_suffix} != "compatible" ]]; then
+				ss_link=""
+			else
+				ss_link_qr
+			fi
+		fi
+	else
+		if [[ ${protocol_suffix} != "compatible" ]]; then
+			ss_link=""
+		else
+			if [[ ${obfs_suffix} != "compatible" ]]; then
+				if [[ ${obfs_suffix} = "plain" ]]; then
+					ss_link_qr
+				else
+					ss_link=""
+				fi
+			else
+				ss_link_qr
+			fi
+		fi
+	fi
+	ssr_link_qr
+}
+
+# 显示 配置信息
+View_User(){
+	SSR_installation_status
+	List_port_user
+	while true
+	do
+		echo -e "请输入要查看账号信息的用户 端口"
+		stty erase '^H' && read -p "(默认: 取消):" View_user_port
+		[[ -z "${View_user_port}" ]] && echo -e "已取消..." && exit 1
+		View_user=$(cat "${config_user_mudb_file}"|grep '"port": '"${View_user_port}"',')
+		if [[ ! -z ${View_user} ]]; then
+			Get_User_info "${View_user_port}"
+			View_User_info
+			break
+		else
+			echo -e "${Error} 请输入正确的端口 !"
+		fi
+	done
+}
+
+
+View_User_info(){
+	ip=$(cat ${config_user_api_file}|grep "SERVER_PUB_ADDR = "|awk -F "\'" '{print $2}')
+	[[ -z "${ip}" ]] && Get_IP
+	ss_ssr_determine
+	clear && echo "===================================================" && echo
+	echo -e " 用户 [${user_name}] 的配置信息：" && echo
+	echo -e " I  P\t    : ${Green_font_prefix}${ip}${Font_color_suffix}"
+	echo -e " 端口\t    : ${Green_font_prefix}${port}${Font_color_suffix}"
+	echo -e " 密码\t    : ${Green_font_prefix}${password}${Font_color_suffix}"
+	echo -e " 加密\t    : ${Green_font_prefix}${method}${Font_color_suffix}"
+	echo -e " 协议\t    : ${Red_font_prefix}${protocol}${Font_color_suffix}"
+	echo -e " 混淆\t    : ${Red_font_prefix}${obfs}${Font_color_suffix}"
+	echo -e " 设备数限制 : ${Green_font_prefix}${protocol_param}${Font_color_suffix}"
+	echo -e " 单线程限速 : ${Green_font_prefix}${speed_limit_per_con} KB/S${Font_color_suffix}"
+	echo -e " 用户总限速 : ${Green_font_prefix}${speed_limit_per_user} KB/S${Font_color_suffix}"
+	echo -e " 禁止的端口 : ${Green_font_prefix}${forbidden_port} ${Font_color_suffix}"
+	echo
+	echo -e " 已使用流量 : 上传: ${Green_font_prefix}${u}${Font_color_suffix} + 下载: ${Green_font_prefix}${d}${Font_color_suffix} = ${Green_font_prefix}${transfer_enable_Used_2}${Font_color_suffix}"
+	echo -e " 剩余的流量 : ${Green_font_prefix}${transfer_enable_Used} ${Font_color_suffix}"
+	echo -e " 用户总流量 : ${Green_font_prefix}${transfer_enable} ${Font_color_suffix}"
+	echo -e "${ss_link}"
+	echo -e "${ssr_link}"
+	echo -e " ${Green_font_prefix} 提示: ${Font_color_suffix}
+ 协议和混淆后面的[ _compatible ]，指的是 兼容原版协议/混淆。"
+	echo && echo "==================================================="
+}
+
+# 设置 配置信息
+Set_config_user(){
+	echo "请输入要设置的用户 用户名(请勿重复, 用于区分, 不支持中文, 会报错 !)"
+	stty erase '^H' && read -p "(默认: caosong):" ssr_user
+	[[ -z "${ssr_user}" ]] && ssr_user="caosong"
+	echo && echo ${Separator_1} && echo -e "	用户名 : ${Green_font_prefix}${ssr_user}${Font_color_suffix}" && echo ${Separator_1} && echo
+}
+
+Set_config_port(){
+	while true
+	do
+	echo -e "请输入要设置的用户 端口(请勿重复, 用于区分)"
+	stty erase '^H' && read -p "(默认: 2000):" ssr_port
+	[[ -z "$ssr_port" ]] && ssr_port="2000"
+	expr ${ssr_port} + 0 &>/dev/null
+	if [[ $? == 0 ]]; then
+		if [[ ${ssr_port} -ge 1 ]] && [[ ${ssr_port} -le 65535 ]]; then
+			echo && echo ${Separator_1} && echo -e "	端口 : ${Green_font_prefix}${ssr_port}${Font_color_suffix}" && echo ${Separator_1} && echo
+			break
+		else
+			echo -e "${Error} 请输入正确的数字(1-65535)"
+		fi
+	else
+		echo -e "${Error} 请输入正确的数字(1-65535)"
+	fi
+	done
+}
+
+Set_config_password(){
+	echo "请输入要设置的用户 密码"
+	stty erase '^H' && read -p "(默认: bbaaz.com):" ssr_password
+	[[ -z "${ssr_password}" ]] && ssr_password="bbaaz.com"
+	echo && echo ${Separator_1} && echo -e "	密码 : ${Green_font_prefix}${ssr_password}${Font_color_suffix}" && echo ${Separator_1} && echo
+}
+
+
+
+Set_config_method(){
+	echo -e "请选择要设置的用户 加密方式
+ ${Green_font_prefix} 1.${Font_color_suffix} none
+ ${Tip} 如果使用 auth_chain_* 系列协议，建议加密方式选择 none (该系列协议自带 RC4 加密)，混淆随意
+ 
+ ${Green_font_prefix} 2.${Font_color_suffix} rc4
+ ${Green_font_prefix} 3.${Font_color_suffix} rc4-md5
+ ${Green_font_prefix} 4.${Font_color_suffix} rc4-md5-6
+ 
+ ${Green_font_prefix} 5.${Font_color_suffix} aes-128-ctr
+ ${Green_font_prefix} 6.${Font_color_suffix} aes-192-ctr
+ ${Green_font_prefix} 7.${Font_color_suffix} aes-256-ctr
+ 
+ ${Green_font_prefix} 8.${Font_color_suffix} aes-128-cfb
+ ${Green_font_prefix} 9.${Font_color_suffix} aes-192-cfb
+ ${Green_font_prefix}10.${Font_color_suffix} aes-256-cfb
+ 
+ ${Green_font_prefix}11.${Font_color_suffix} aes-128-cfb8
+ ${Green_font_prefix}12.${Font_color_suffix} aes-192-cfb8
+ ${Green_font_prefix}13.${Font_color_suffix} aes-256-cfb8
+ 
+ ${Green_font_prefix}14.${Font_color_suffix} salsa20
+ ${Green_font_prefix}15.${Font_color_suffix} chacha20
+ ${Green_font_prefix}16.${Font_color_suffix} chacha20-ietf
+ ${Tip} salsa20/chacha20-*系列加密方式，需要额外安装依赖 libsodium ，否则会无法启动ShadowsocksR !" && echo
+	stty erase '^H' && read -p "(默认: 5. aes-128-ctr):" ssr_method
+	[[ -z "${ssr_method}" ]] && ssr_method="5"
+	if [[ ${ssr_method} == "1" ]]; then
+		ssr_method="none"
+	elif [[ ${ssr_method} == "2" ]]; then
+		ssr_method="rc4"
+	elif [[ ${ssr_method} == "3" ]]; then
+		ssr_method="rc4-md5"
+	elif [[ ${ssr_method} == "4" ]]; then
+		ssr_method="rc4-md5-6"
+	elif [[ ${ssr_method} == "5" ]]; then
+		ssr_method="aes-128-ctr"
+	elif [[ ${ssr_method} == "6" ]]; then
+		ssr_method="aes-192-ctr"
+	elif [[ ${ssr_method} == "7" ]]; then
+		ssr_method="aes-256-ctr"
+	elif [[ ${ssr_method} == "8" ]]; then
+		ssr_method="aes-128-cfb"
+	elif [[ ${ssr_method} == "9" ]]; then
+		ssr_method="aes-192-cfb"
+	elif [[ ${ssr_method} == "10" ]]; then
+		ssr_method="aes-256-cfb"
+	elif [[ ${ssr_method} == "11" ]]; then
+		ssr_method="aes-128-cfb8"
+	elif [[ ${ssr_method} == "12" ]]; then
+		ssr_method="aes-192-cfb8"
+	elif [[ ${ssr_method} == "13" ]]; then
+		ssr_method="aes-256-cfb8"
+	elif [[ ${ssr_method} == "14" ]]; then
+		ssr_method="salsa20"
+	elif [[ ${ssr_method} == "15" ]]; then
+		ssr_method="chacha20"
+	elif [[ ${ssr_method} == "16" ]]; then
+		ssr_method="chacha20-ietf"
+	else
+		ssr_method="aes-128-ctr"
+	fi
+	echo && echo ${Separator_1} && echo -e "	加密 : ${Green_font_prefix}${ssr_method}${Font_color_suffix}" && echo ${Separator_1} && echo
+}
+
+
+Set_config_protocol(){
+	echo -e "请选择要设置的用户 协议插件
+ ${Green_font_prefix}1.${Font_color_suffix} origin
+ ${Green_font_prefix}2.${Font_color_suffix} auth_sha1_v4
+ ${Green_font_prefix}3.${Font_color_suffix} auth_aes128_md5
+ ${Green_font_prefix}4.${Font_color_suffix} auth_aes128_sha1
+ ${Green_font_prefix}5.${Font_color_suffix} auth_chain_a
+ ${Green_font_prefix}6.${Font_color_suffix} auth_chain_b
+ ${Tip} 如果使用 auth_chain_* 系列协议，建议加密方式选择 none (该系列协议自带 RC4 加密)，混淆随意" && echo
+	stty erase '^H' && read -p "(默认: 2. auth_sha1_v4):" ssr_protocol
+	[[ -z "${ssr_protocol}" ]] && ssr_protocol="2"
+	if [[ ${ssr_protocol} == "1" ]]; then
+		ssr_protocol="origin"
+	elif [[ ${ssr_protocol} == "2" ]]; then
+		ssr_protocol="auth_sha1_v4"
+	elif [[ ${ssr_protocol} == "3" ]]; then
+		ssr_protocol="auth_aes128_md5"
+	elif [[ ${ssr_protocol} == "4" ]]; then
+		ssr_protocol="auth_aes128_sha1"
+	elif [[ ${ssr_protocol} == "5" ]]; then
+		ssr_protocol="auth_chain_a"
+	elif [[ ${ssr_protocol} == "6" ]]; then
+		ssr_protocol="auth_chain_b"
+	else
+		ssr_protocol="auth_sha1_v4"
+	fi
+	echo && echo ${Separator_1} && echo -e "	协议 : ${Green_font_prefix}${ssr_protocol}${Font_color_suffix}" && echo ${Separator_1} && echo
+	if [[ ${ssr_protocol} != "origin" ]]; then
+		if [[ ${ssr_protocol} == "auth_sha1_v4" ]]; then
+			stty erase '^H' && read -p "是否设置 协议插件兼容原版(_compatible)？[Y/n]" ssr_protocol_yn
+			[[ -z "${ssr_protocol_yn}" ]] && ssr_protocol_yn="y"
+			[[ $ssr_protocol_yn == [Yy] ]] && ssr_protocol=${ssr_protocol}"_compatible"
+			echo
+		fi
+	fi
+}
+
+
+Set_config_obfs(){
+	echo -e "请选择要设置的用户 混淆插件
+ ${Green_font_prefix}1.${Font_color_suffix} plain
+ ${Green_font_prefix}2.${Font_color_suffix} http_simple
+ ${Green_font_prefix}3.${Font_color_suffix} http_post
+ ${Green_font_prefix}4.${Font_color_suffix} random_head
+ ${Green_font_prefix}5.${Font_color_suffix} tls1.2_ticket_auth
+ ${Tip} 如果使用 ShadowsocksR 代理游戏，建议选择 混淆兼容原版或 plain 混淆，然后客户端选择 plain，否则会增加延迟 !
+ 另外, 如果你选择了 tls1.2_ticket_auth，那么客户端可以选择 tls1.2_ticket_fastauth，这样即能伪装特征 又不会增加延迟 !" && echo
+	stty erase '^H' && read -p "(默认: 5. tls1.2_ticket_auth):" ssr_obfs
+	[[ -z "${ssr_obfs}" ]] && ssr_obfs="5"
+	if [[ ${ssr_obfs} == "1" ]]; then
+		ssr_obfs="plain"
+	elif [[ ${ssr_obfs} == "2" ]]; then
+		ssr_obfs="http_simple"
+	elif [[ ${ssr_obfs} == "3" ]]; then
+		ssr_obfs="http_post"
+	elif [[ ${ssr_obfs} == "4" ]]; then
+		ssr_obfs="random_head"
+	elif [[ ${ssr_obfs} == "5" ]]; then
+		ssr_obfs="tls1.2_ticket_auth"
+	else
+		ssr_obfs="tls1.2_ticket_auth"
+	fi
+	echo && echo ${Separator_1} && echo -e "	混淆 : ${Green_font_prefix}${ssr_obfs}${Font_color_suffix}" && echo ${Separator_1} && echo
+	if [[ ${ssr_obfs} != "plain" ]]; then
+			stty erase '^H' && read -p "是否设置 混淆插件兼容原版(_compatible)？[Y/n]" ssr_obfs_yn
+			[[ -z "${ssr_obfs_yn}" ]] && ssr_obfs_yn="y"
+			[[ $ssr_obfs_yn == [Yy] ]] && ssr_obfs=${ssr_obfs}"_compatible"
+			echo
+	fi
+}
+
+
+
+Set_config_speed_limit_per_con(){
+	while true
+	do
+	echo -e "请输入要设置的用户 单线程 限速上限(单位：KB/S)"
+	echo -e "${Tip} 单线程限速：每个端口 单线程的限速上限，多线程即无效。"
+	stty erase '^H' && read -p "(默认: 无限):" ssr_speed_limit_per_con
+	[[ -z "$ssr_speed_limit_per_con" ]] && ssr_speed_limit_per_con=0 && echo && break
+	expr ${ssr_speed_limit_per_con} + 0 &>/dev/null
+	if [[ $? == 0 ]]; then
+		if [[ ${ssr_speed_limit_per_con} -ge 1 ]] && [[ ${ssr_speed_limit_per_con} -le 131072 ]]; then
+			echo && echo ${Separator_1} && echo -e "	单线程限速 : ${Green_font_prefix}${ssr_speed_limit_per_con} KB/S${Font_color_suffix}" && echo ${Separator_1} && echo
+			break
+		else
+			echo -e "${Error} 请输入正确的数字(1-131072)"
+		fi
+	else
+		echo -e "${Error} 请输入正确的数字(1-131072)"
+	fi
+	done
+}
+
+
+Set_config_speed_limit_per_user(){
+	while true
+	do
+	echo
+	echo -e "请输入要设置的用户 总速度 限速上限(单位：KB/S)"
+	echo -e "${Tip} 端口总限速：每个端口 总速度 限速上限，单个端口整体限速。"
+	stty erase '^H' && read -p "(默认: 无限):" ssr_speed_limit_per_user
+	[[ -z "$ssr_speed_limit_per_user" ]] && ssr_speed_limit_per_user=0 && echo && break
+	expr ${ssr_speed_limit_per_user} + 0 &>/dev/null
+	if [[ $? == 0 ]]; then
+		if [[ ${ssr_speed_limit_per_user} -ge 1 ]] && [[ ${ssr_speed_limit_per_user} -le 131072 ]]; then
+			echo && echo ${Separator_1} && echo -e "	用户总限速 : ${Green_font_prefix}${ssr_speed_limit_per_user} KB/S${Font_color_suffix}" && echo ${Separator_1} && echo
+			break
+		else
+			echo -e "${Error} 请输入正确的数字(1-131072)"
+		fi
+	else
+		echo -e "${Error} 请输入正确的数字(1-131072)"
+	fi
+	done
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
