@@ -5,11 +5,11 @@ export PATH
 #=================================================
 #	System Required: CentOS 6+/Debian 6+/Ubuntu 14.04+
 #	Description: Install the ShadowsocksR mudbjson server
-#	Version: 1.0.0
+#	Version: 1.0.1
 #	Author: 小布丁的心事
 #=================================================
 
-sh_ver="1.0.0"
+sh_ver="1.0.1"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 ssr_folder="/usr/local/shadowsocksr"
@@ -1537,7 +1537,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 		Install_BBR
 	elif [[ ${bbr_num} == "2" ]]; then
 		Start_BBR
-	elif [[ ${bbr_num} == "3" ]]; then
+	elif [[ ${bbr_nubm} == "3" ]]; then
 		Stop_BBR
 	elif [[ ${bbr_num} == "4" ]]; then
 		Status_BBR
@@ -1545,19 +1545,48 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 		echo -e "${Error} 请输入正确的数字(1-4)" && exit 1
 	fi
 }
+
+#管理ShadowsocksR
+shadowsocksr_manager(){
+
+	echo && echo -e "  你要做什么？
+	
+ ${Green_font_prefix}1.${Font_color_suffix} 安装 ShadowsocksR
+ ${Green_font_prefix}2.${Font_color_suffix} 更新 ShadowsocksR
+ ${Green_font_prefix}3.${Font_color_suffix} 卸载 ShadowsocksR"
+ 
+	stty erase '^H' && read -p "(默认: 取消):" shadowsocksr_manager_num
+	[[ -z "${shadowsocksr_manager_num}" ]] && echo "已取消..." && exit 1
+	if [[ ${shadowsocksr_manager_num} == "1" ]]; then
+		Install_SSR
+	elif [[ ${shadowsocksr_manager_num} == "2" ]]; then
+		Update_SSR
+	elif [[ ${shadowsocksr_manager_num} == "3" ]]; then
+		Uninstall_SSR
+	else
+		echo -e "${Error} 请输入正确的数字(1-3)" && exit 1
+	fi
+
+}
+
+
+#安装BBR
 Install_BBR(){
 	[[ ${release} = "centos" ]] && echo -e "${Error} 本脚本不支持 CentOS系统安装 BBR !" && exit 1
 	BBR_installation_status
 	bash "${BBR_file}"
 }
+#启动BBR
 Start_BBR(){
 	BBR_installation_status
 	bash "${BBR_file}" start
 }
+#停止BBR
 Stop_BBR(){
 	BBR_installation_status
 	bash "${BBR_file}" stop
 }
+#查看BBR状态
 Status_BBR(){
 	BBR_installation_status
 	bash "${BBR_file}" status
@@ -1576,6 +1605,7 @@ Other_functions(){
   ${Green_font_prefix}5.${Font_color_suffix} 一键解封 BT/PT/SPAM (iptables)
 ————————————
   ${Green_font_prefix}6.${Font_color_suffix} 切换 ShadowsocksR日志输出模式
+  ${Green_font_prefix}7.${Font_color_suffix} 安装 libsodium(chacha20)
   —— 说明：SSR默认只输出错误日志，此项可切换为输出详细的访问日志" && echo
 	stty erase '^H' && read -p "(默认: 取消):" other_num
 	[[ -z "${other_num}" ]] && echo "已取消..." && exit 1
@@ -1591,6 +1621,8 @@ Other_functions(){
 		UnBanBTPTSPAM
 	elif [[ ${other_num} == "6" ]]; then
 		Set_config_connect_verbose_info
+	elif [[ ${other_num} == "7" ]]; then
+	Install_Libsodium
 	else
 		echo -e "${Error} 请输入正确的数字 [1-6]" && exit 1
 	fi
@@ -1660,6 +1692,14 @@ Update_Shell(){
 	fi
 	exit 0
 }
+
+test_f(){
+echo -e "测试功能！	"
+
+
+}
+
+
 # 显示 菜单状态
 menu_status(){
 	if [[ -e ${ssr_folder} ]]; then
@@ -1674,80 +1714,75 @@ menu_status(){
 		echo -e " 当前状态: ${Red_font_prefix}未安装${Font_color_suffix}"
 	fi
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 check_sys
 [[ ${release} != "debian" ]] && [[ ${release} != "ubuntu" ]] && [[ ${release} != "centos" ]] && echo -e "${Error} 本脚本不支持当前系统 ${release} !" && exit 1
 action=$1
 if [[ "${action}" == "clearall" ]]; then
 	Clear_transfer_all
 else
-	echo -e "  ShadowsocksR MuJSON一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_color_suffix}
-  ---- bye - 小布丁的心事/ss-jc60 ----
+	echo -e "  ShadowsocksR 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_color_suffix}
+  ---- bye-小布丁的心事----
 
-  ${Green_font_prefix}1.${Font_color_suffix} 安装 ShadowsocksR
-  ${Green_font_prefix}2.${Font_color_suffix} 更新 ShadowsocksR
-  ${Green_font_prefix}3.${Font_color_suffix} 卸载 ShadowsocksR
-  ${Green_font_prefix}4.${Font_color_suffix} 安装 libsodium(chacha20)
-————————————
-  ${Green_font_prefix}5.${Font_color_suffix} 查看 账号信息
-  ${Green_font_prefix}6.${Font_color_suffix} 显示 连接信息
-  ${Green_font_prefix}7.${Font_color_suffix} 设置 用户配置
-  ${Green_font_prefix}8.${Font_color_suffix} 手动 修改配置
-  ${Green_font_prefix}9.${Font_color_suffix} 清零 已用流量
-————————————
- ${Green_font_prefix}10.${Font_color_suffix} 启动 ShadowsocksR
- ${Green_font_prefix}11.${Font_color_suffix} 停止 ShadowsocksR
- ${Green_font_prefix}12.${Font_color_suffix} 重启 ShadowsocksR
- ${Green_font_prefix}13.${Font_color_suffix} 查看 ShadowsocksR 日志
-————————————
- ${Green_font_prefix}14.${Font_color_suffix} 其他功能
- ${Green_font_prefix}15.${Font_color_suffix} 升级脚本
+  ${Green_font_prefix} 1.${Font_color_suffix} 管理 ShadowsocksR
+  ${Green_font_prefix} 2.${Font_color_suffix} 查看 账号信息
+  ${Green_font_prefix} 3.${Font_color_suffix} 显示 连接信息
+  ${Green_font_prefix} 4.${Font_color_suffix} 设置 用户配置
+  ${Green_font_prefix} 5.${Font_color_suffix} 手动 修改配置
+  ${Green_font_prefix} 6.${Font_color_suffix} 清零 已用流量
+  ${Green_font_prefix} 7.${Font_color_suffix} 启动 ShadowsocksR
+  ${Green_font_prefix} 8.${Font_color_suffix} 重启 ShadowsocksR
+  ${Green_font_prefix} 9.${Font_color_suffix} 查看 ShadowsocksR 日志
+  ${Green_font_prefix}10.${Font_color_suffix} 其他功能
+  ${Green_font_prefix}11.${Font_color_suffix} 升级脚本
  "
 	menu_status
 	echo && stty erase '^H' && read -p "请输入数字 [1-15]：" num
 case "$num" in
 	1)
-	Install_SSR
+	shadowsocksr_manager
 	;;
 	2)
-	Update_SSR
-	;;
-	3)
-	Uninstall_SSR
-	;;
-	4)
-	Install_Libsodium
-	;;
-	5)
 	View_User
 	;;
-	6)
+	3)
 	View_user_connection_info
 	;;
-	7)
+	4)
 	Modify_Config
 	;;
-	8)
-	Manually_Modify_Config
-	;;
-	9)
+	5)
 	Clear_transfer
 	;;
-	10)
+	6)
 	Start_SSR
 	;;
-	11)
+	7)
 	Stop_SSR
 	;;
-	12)
+	8)
 	Restart_SSR
 	;;
-	13)
+	9)
 	View_Log
 	;;
-	14)
+	10)
 	Other_functions
 	;;
-	15)
+	11)
 	Update_Shell
 	;;
 	*)
