@@ -356,16 +356,16 @@ View_User_info(){
 # 设置 配置信息
 Set_config_user(){
 	echo "请输入要设置的用户 用户名(请勿重复, 用于区分, 不支持中文, 会报错 !)"
-	stty erase '^H' && read -p "(默认: bbaaz):" ssr_user
-	[[ -z "${ssr_user}" ]] && ssr_user="bbaaz"
+	stty erase '^H' && read -p "(默认: xbddxs):" ssr_user
+	[[ -z "${ssr_user}" ]] && ssr_user="xbddxs"
 	echo && echo ${Separator_1} && echo -e "	用户名 : ${Green_font_prefix}${ssr_user}${Font_color_suffix}" && echo ${Separator_1} && echo
 }
 Set_config_port(){
 	while true
 	do
 	echo -e "请输入要设置的用户 端口(请勿重复, 用于区分)"
-	stty erase '^H' && read -p "(默认: 6899):" ssr_port
-	[[ -z "$ssr_port" ]] && ssr_port="6899"
+	stty erase '^H' && read -p "(默认: 10000):" ssr_port
+	[[ -z "$ssr_port" ]] && ssr_port="10000"
 	expr ${ssr_port} + 0 &>/dev/null
 	if [[ $? == 0 ]]; then
 		if [[ ${ssr_port} -ge 1 ]] && [[ ${ssr_port} -le 65535 ]]; then
@@ -381,8 +381,8 @@ Set_config_port(){
 }
 Set_config_password(){
 	echo "请输入要设置的用户 密码"
-	stty erase '^H' && read -p "(默认: bbaaz.com):" ssr_password
-	[[ -z "${ssr_password}" ]] && ssr_password="bbaaz.com"
+	stty erase '^H' && read -p "(默认: 123456):" ssr_password
+	[[ -z "${ssr_password}" ]] && ssr_password="123456"
 	echo && echo ${Separator_1} && echo -e "	密码 : ${Green_font_prefix}${ssr_password}${Font_color_suffix}" && echo ${Separator_1} && echo
 }
 Set_config_method(){
@@ -1606,6 +1606,7 @@ Other_functions(){
 ————————————
   ${Green_font_prefix}6.${Font_color_suffix} 切换 ShadowsocksR日志输出模式
   ${Green_font_prefix}7.${Font_color_suffix} 安装 libsodium(chacha20)
+  ${Green_font_prefix}8.${Font_color_suffix} web 监控功能
   —— 说明：SSR默认只输出错误日志，此项可切换为输出详细的访问日志" && echo
 	stty erase '^H' && read -p "(默认: 取消):" other_num
 	[[ -z "${other_num}" ]] && echo "已取消..." && exit 1
@@ -1623,6 +1624,8 @@ Other_functions(){
 		Set_config_connect_verbose_info
 	elif [[ ${other_num} == "7" ]]; then
 	Install_Libsodium
+	elif [[ ${other_num} == "8" ]];then
+		web_Monitor_Features
 	else
 		echo -e "${Error} 请输入正确的数字 [1-6]" && exit 1
 	fi
@@ -1692,12 +1695,21 @@ Update_Shell(){
 	fi
 	exit 0
 }
+#web 监控功能
+web_Monitor_Features ()
+{
+echo && echo -e " 你要做什么？
 
-test_f(){
-echo -e "测试功能！	"
+
+
+
+" && echo
+
 
 
 }
+
+
 
 
 # 显示 菜单状态
