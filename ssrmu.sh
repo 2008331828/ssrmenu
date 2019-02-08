@@ -1695,19 +1695,55 @@ Update_Shell(){
 	fi
 	exit 0
 }
+
+
 #web 监控功能
 web_Monitor_Features ()
 {
 echo && echo -e " 你要做什么？
-
-
-
-
+${Green_background_prefix}1.${Font_color_suffix} 安装 web 监控
+${Green_background_prefix}2.${Font_color_suffix} 启动 web 监控
+${Green_background_prefix}3.${Font_color_suffix} 重启 web 监控
+${Green_background_prefix}4.${Font_color_suffix} 停止 web 监控
 " && echo
+	stty erase '^H' && read -p "(默认: 取消):" web_Monitor_Features_num
+	[[ -z "${web_Monitor_Features_num}" ]] && echo "已取消..." && exit 1
+	if [[ ${web_Monitor_Features_num} == "1" ]]; then
+	install_Web_Monitor
+	elif [[${web_Monitor_Features_num} == "2" ]]; then
+	start_web_Monitor
+	elif [[${web_Monitor_Features_num} == "3" ]]; then
+	restart_Web_Monitor
+	elif [[${web_Monitor_Features_num} == "4" ]]; then
+	stop_Web_Monitor
+	else
+		else
+		echo -e "${Error} 请输入正确的数字 [1-6]" && exit 1
+	fi
+}
 
+
+install_Web_Monitor()
+{
 
 
 }
+
+start_web_Monitor()
+{
+
+}
+
+restart_Web_Monitor()
+{
+
+}
+
+stop_Web_Monitor()
+{
+
+}
+
 
 
 
