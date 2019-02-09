@@ -1717,32 +1717,11 @@ ${Green_background_prefix}4.${Font_color_suffix} 停止 web 监控
 	elif [[${web_Monitor_Features_num} == "4" ]]; then
 	stop_Web_Monitor
 	else
-		else
 		echo -e "${Error} 请输入正确的数字 [1-6]" && exit 1
 	fi
 }
 
 
-install_Web_Monitor()
-{
-
-
-}
-
-start_web_Monitor()
-{
-
-}
-
-restart_Web_Monitor()
-{
-
-}
-
-stop_Web_Monitor()
-{
-
-}
 
 
 
