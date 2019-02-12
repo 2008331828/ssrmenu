@@ -541,12 +541,12 @@ View_log(){
 Set_SSRStatus(){
 	check_installed_server_status
 	echo && echo -e " 你要做什么？
-	
- ${Green_font_prefix} 1.${Font_color_suffix} 添加 账号配置
- ${Green_font_prefix} 2.${Font_color_suffix} 删除 账号配置
- ${Green_font_prefix} 3.${Font_color_suffix} 修改 账号配置
+${Green_font_prefix} 1.${Font_color_suffix} 添加 账号配置
+${Green_font_prefix} 2.${Font_color_suffix} 删除 账号配置
+${Green_font_prefix} 3.${Font_color_suffix} 修改 账号配置
+${Green_font_prefix} 4.${Font_color_suffix} 导入 Shadowsocks 张号
 ————————
- ${Green_font_prefix} 4.${Font_color_suffix} 启用/禁用 账号配置
+ ${Green_font_prefix} 5.${Font_color_suffix} 启用/禁用 账号配置
  注意：添加/修改/删除 账号配置后，不会立即更新，需要自动(定时)/手动检测一次所有账号，网页才会更新 !" && echo
 	read -e -p "(默认: 取消):" server_num
 	[[ -z "${server_num}" ]] && echo "已取消..." && exit 1
@@ -556,12 +556,23 @@ Set_SSRStatus(){
 		Del_SSRStatus
 	elif [[ ${server_num} == "3" ]]; then
 		Modify_SSRStatus
-	elif [[ ${server_num} == "4" ]]; then
+    elif [[ ${server_num} == "4" ]]; then
+	import_SSRUser
+	elif [[ ${server_num} == "5" ]]; then
 		Modify_SSRStatus_disabled
 	else
 		echo -e "${Error} 请输入正确的数字[1-4]" && exit 1
 	fi
 }
+
+import_SSRUser()
+{
+
+
+
+}
+
+
 List_SSRStatus(){
 	Get_Like
 	echo -e "目前有 ${Like_num} 个账号配置\n$(echo -e "${Like}"|grep -n "#")"
