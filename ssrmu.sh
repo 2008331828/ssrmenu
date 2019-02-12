@@ -5,10 +5,10 @@ export PATH
 #=================================================
 #	System Required: CentOS 6+/Debian 6+/Ubuntu 14.04+
 #	Description: Install the ShadowsocksR mudbjson server
-#	Version: 1.1.1
+#	Version: 1.1.2
 #	Author: 小布丁的心事
 #=================================================
-sh_ver="1.1.1"
+sh_ver="1.1.2"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 ssr_folder="/usr/local/shadowsocksr"
@@ -1701,20 +1701,13 @@ web_Monitor_Features ()
 {
 echo && echo -e " 你要做什么？
 ${Green_background_prefix}1.${Font_color_suffix} 安装 web 监控
-${Green_background_prefix}2.${Font_color_suffix} 启动 web 监控
-${Green_background_prefix}3.${Font_color_suffix} 重启 web 监控
-${Green_background_prefix}4.${Font_color_suffix} 停止 web 监控
+
 " && echo
 	stty erase '^H' && read -p "(默认: 取消):" web_Monitor_Features_num
 	[[ -z "${web_Monitor_Features_num}" ]] && echo "已取消..." && exit 1
 	if [[ ${web_Monitor_Features_num} == "1" ]]; then
 	install_Web_Monitor
-	elif [[${web_Monitor_Features_num} == "2" ]]; then
-	start_web_Monitor
-	elif [[${web_Monitor_Features_num} == "3" ]]; then
-	restart_Web_Monitor
-	elif [[${web_Monitor_Features_num} == "4" ]]; then
-	stop_Web_Monitor
+	
 	else
 		echo -e "${Error} 请输入正确的数字 [1-6]" && exit 1
 	fi
@@ -1723,7 +1716,8 @@ ${Green_background_prefix}4.${Font_color_suffix} 停止 web 监控
 install_Web_Monitor()
 {
 echo -e "开始安装 web 监控功能"
-wget -N --no-check-certificate -p /root/ https://raw.githubusercontent.com/2008331828/ssrmenu/master/ssrstatus.sh && chmod +x ssrstatus.sh
+wget -N --no-check-certificate https://raw.githubusercontent.com/2008331828/ssrmenu/master/ssrstatus.sh && chmod +x ssrstatus.sh
+
 }
 
 
