@@ -5,11 +5,11 @@ export PATH
 #=================================================
 #	System Required: CentOS 6+/Debian 7+/Ubuntu 14.04+
 #	Description: ShadowsocksR Status
-#	Version: 1.0.5
-#	Author: Toyo
+#	Version: 1.0.1
+#	Author: 小布丁的心事
 #=================================================
 
-sh_ver="1.0.5"
+sh_ver="1.0.1"
 Timeout="10"
 Test_URL="https://www.bing.com"
 Web_file="/usr/local/SSRStatus"
@@ -230,7 +230,7 @@ set_config_location(){
 }
 Set_server(){
 	echo -e "请输入 SSRStatus 网站要设置的 域名[server]
-默认为本机IP为域名，例如输入: toyoo.ml，如果要使用本机IP，请留空直接回车"
+默认为本机IP为域名，例如输入: caosong.pw，如果要使用本机IP，请留空直接回车"
 	read -e -p "(默认: 本机IP):" server_s
 	[[ -z "$server_s" ]] && server_s=""
 	
@@ -240,8 +240,8 @@ Set_server_port(){
 	while true
 		do
 		echo -e "请输入 SSRStatus 网站要设置的 域名/IP的端口[1-65535]（如果是域名的话，一般建议用 http 80 端口）"
-		read -e -p "(默认: 8888):" server_port_s
-		[[ -z "$server_port_s" ]] && server_port_s="8888"
+		read -e -p "(默认: 80):" server_port_s
+		[[ -z "$server_port_s" ]] && server_port_s="80"
 		echo $((${server_port_s}+0)) &>/dev/null
 		if [[ $? -eq 0 ]]; then
 			if [[ ${server_port_s} -ge 1 ]] && [[ ${server_port_s} -le 65535 ]]; then
