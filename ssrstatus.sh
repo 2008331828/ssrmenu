@@ -5,11 +5,11 @@ export PATH
 #=================================================
 #	System Required: CentOS 6+/Debian 7+/Ubuntu 14.04+
 #	Description: ShadowsocksR Status
-#	Version: 1.0.1
+#	Version: 1.0.2
 #	Author: 小布丁的心事
 #=================================================
 
-sh_ver="1.0.1"
+sh_ver="1.0.2"
 Timeout="10"
 Test_URL="https://www.bing.com"
 Web_file="/usr/local/SSRStatus"
@@ -565,12 +565,6 @@ ${Green_font_prefix} 4.${Font_color_suffix} 导入 Shadowsocks 张号
 	fi
 }
 
-import_SSRUser()
-{
-
-
-
-}
 
 
 List_SSRStatus(){
