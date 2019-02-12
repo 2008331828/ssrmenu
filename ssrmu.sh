@@ -5,10 +5,10 @@ export PATH
 #=================================================
 #	System Required: CentOS 6+/Debian 6+/Ubuntu 14.04+
 #	Description: Install the ShadowsocksR mudbjson server
-#	Version: 1.1.2
+#	Version: 1.1.3"
 #	Author: 小布丁的心事
 #=================================================
-sh_ver="1.1.2"
+sh_ver="1.1.3"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 ssr_folder="/usr/local/shadowsocksr"
@@ -1716,7 +1716,7 @@ ${Green_background_prefix}1.${Font_color_suffix} 安装 web 监控
 install_Web_Monitor()
 {
 echo -e "开始安装 web 监控功能"
-wget -N --no-check-certificate https://raw.githubusercontent.com/2008331828/ssrmenu/master/ssrstatus.sh && chmod +x ssrstatus.sh
+wget -N -P /root/  --no-check-certificate https://raw.githubusercontent.com/2008331828/ssrmenu/master/ssrstatus.sh && chmod +x ssrstatus.sh
 
 }
 
