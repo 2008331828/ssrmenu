@@ -5,10 +5,10 @@ export PATH
 #=================================================
 #	System Required: CentOS 6+/Debian 6+/Ubuntu 14.04+
 #	Description: Install the ShadowsocksR mudbjson server
-#	Version: 1.1.3"
+#	Version: 1.1.4"
 #	Author: 小布丁的心事
 #=================================================
-sh_ver="1.1.3"
+sh_ver="1.1.4"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 ssr_folder="/usr/local/shadowsocksr"
@@ -70,7 +70,7 @@ BBR_installation_status(){
 	if [[ ! -e ${BBR_file} ]]; then
 		echo -e "${Error} 没有发现 BBR脚本，开始下载..."
 		cd "${file}"
-		if ! wget -N --no-check-certificate https://raw.githubusercontent.com/makedary/bbaaz/master/bbr.sh; then
+		if ! wget -N --no-check-certificate https://raw.githubusercontent.com/teddysun/across/master/bbr.sh; then
 			echo -e "${Error} BBR 脚本下载失败 !" && exit 1
 		else
 			echo -e "${Info} BBR 脚本下载完成 !"
@@ -263,8 +263,6 @@ urlsafe_base64(){
 ss_link_qr(){
 	SSbase64=$(urlsafe_base64 "${method}:${password}@${ip}:${port}")
 	SSurl="ss://${SSbase64}"
-	SSQRcode="https://makeai.cn/qr/?m=2&e=H&p=3&url=${SSurl}"
-	ss_link=" SS    链接 : ${Green_font_prefix}${SSurl}${Font_color_suffix} \n SS  二维码 : ${Green_font_prefix}${SSQRcode}${Font_color_suffix}"
 }
 ssr_link_qr(){
 	SSRprotocol=$(echo ${protocol} | sed 's/_compatible//g')
@@ -272,8 +270,6 @@ ssr_link_qr(){
 	SSRPWDbase64=$(urlsafe_base64 "${password}")
 	SSRbase64=$(urlsafe_base64 "${ip}:${port}:${SSRprotocol}:${method}:${SSRobfs}:${SSRPWDbase64}")
 	SSRurl="ssr://${SSRbase64}"
-	SSRQRcode="https://makeai.cn/qr/?m=2&e=H&p=3&url=${SSRurl}"
-	ssr_link=" SSR   链接 : ${Red_font_prefix}${SSRurl}${Font_color_suffix} \n SSR 二维码 : ${Red_font_prefix}${SSRQRcode}${Font_color_suffix} \n "
 }
 ss_ssr_determine(){
 	protocol_suffix=`echo ${protocol} | awk -F "_" '{print $NF}'`
