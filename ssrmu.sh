@@ -5,10 +5,10 @@ export PATH
 #=================================================
 #	System Required: CentOS 6+/Debian 6+/Ubuntu 14.04+
 #	Description: Install the ShadowsocksR mudbjson server
-#	Version: 1.1.8"
+#	Version: 1.1.9"
 #	Author: 小布丁的心事
 #=================================================
-sh_ver="1.1.8"
+sh_ver="1.1.9"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 ssr_folder="/usr/local/shadowsocksr"
@@ -1569,8 +1569,8 @@ shadowsocksr_manager(){
 
 #安装BBR
 Install_BBR(){
+yum remove firewalld -y
 	[[ ${release} = "suse" ]] && echo -e "${Error} 本脚本不支持 suse 系统安装 BBR !" && exit 1
-	yum remove firewalld -y
 	BBR_installation_status
 	bash "${BBR_file}"
 }
@@ -1715,7 +1715,7 @@ ${Green_background_prefix}1.${Font_color_suffix} 安装 web 监控
 install_Web_Monitor()
 {
 echo -e "开始安装 web 监控功能"
-wget -N -P /root/  --no-check-certificate https://raw.githubusercontent.com/2008331828/ssrmenu/master/ssrstatus.sh && chmod +x ssrstatus.sh
+wget -N --no-check-certificate https://raw.githubusercontent.com/2008331828/ssrmenu/master/ssrstatus.sh && chmod +x ssrstatus.sh
 
 }
 

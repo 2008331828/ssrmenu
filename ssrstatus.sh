@@ -242,6 +242,7 @@ Set_server_port(){
 		echo -e "请输入 SSRStatus 网站要设置的 域名/IP的端口[1-65535]（如果是域名的话，一般建议用 http 80 端口）"
 		read -e -p "(默认: 80):" server_port_s
 		[[ -z "$server_port_s" ]] && server_port_s="80"
+		 iptables -I INPUT -p tcp --dport server_port_s -j ACCEPT
 		echo $((${server_port_s}+0)) &>/dev/null
 		if [[ $? -eq 0 ]]; then
 			if [[ ${server_port_s} -ge 1 ]] && [[ ${server_port_s} -le 65535 ]]; then
@@ -738,7 +739,7 @@ EOF
 			/etc/init.d/caddy restart
 		else
 			echo -e "${Info} 发现 Caddy 配置文件非空，开始追加 ServerStatus 网站配置内容到文件最后..."
-			cat >> "/usr/local/caddy/Caddyfile"<<-EOF
+			cat >> "/usr/local/caddy/Caddyfile"<<-EOF默认: 80)
 http://${server_s}:${server_port_s} {
  root ${Web_file}
  timeouts none
@@ -771,6 +772,7 @@ Install_Web(){
 	Download_SSRStatus
 	echo -e "${Info} 开始配置定时任务..."
 	Set_crontab
+
 	echo -e "${Info} 所有步骤 安装完毕... 请打开本脚本并修改开头的 SSR_folder 变量引号内的ShadowsocksR子目录绝对路径，方可使用。"
 }
 Uninstall_Web(){
