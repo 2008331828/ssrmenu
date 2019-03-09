@@ -5,11 +5,11 @@ export PATH
 #=================================================
 #	System Required: CentOS 6+/Debian 7+/Ubuntu 14.04+
 #	Description: ShadowsocksR Status
-#	Version: 1.0.4
+#	Version: 1.0.5
 #	Author: 小布丁的心事
 #=================================================
 
-sh_ver="1.0.4"
+sh_ver="1.0.5"
 Timeout="10"
 Test_URL="https://www.bing.com"
 Web_file="/usr/local/SSRStatus"
@@ -816,9 +816,9 @@ Del_Crontab(){
 	fi
 }
 Update_Shell(){
-	sh_new_ver=$(wget --no-check-certificate -qO- -t1 -T3 ""https://raw.githubusercontent.com/2008331828/ssrmenu/master/ssrstatus.sh"|grep 'sh_ver="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1) && sh_new_type="github"
+	sh_new_ver=$(wget --no-check-certificate -qO- -t1 -T3 "https://raw.githubusercontent.com/2008331828/ssrmenu/master/ssrstatus.sh"|grep 'sh_ver="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1) && sh_new_type="github"
 	[[ -z ${sh_new_ver} ]] && echo -e "${Error} 无法链接到 Github !" && exit 0
-	wget -N --no-check-certificate ""https://raw.githubusercontent.com/2008331828/ssrmenu/master/ssrstatus.sh" && chmod +x ssrstatus.sh
+	wget -N --no-check-certificate "https://raw.githubusercontent.com/2008331828/ssrmenu/master/ssrstatus.sh" && chmod +x ssrstatus.sh
 	echo -e "脚本已更新为最新版本[ ${sh_new_ver} ] !(注意：因为更新方式为直接覆盖当前运行的脚本，所以可能下面会提示一些报错，无视即可)" && exit 0
 }
 menu(){
