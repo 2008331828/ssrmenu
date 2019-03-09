@@ -5,11 +5,11 @@ export PATH
 #=================================================
 #	System Required: CentOS 6+/Debian 7+/Ubuntu 14.04+
 #	Description: ShadowsocksR Status
-#	Version: 1.0.3
+#	Version: 1.0.4
 #	Author: 小布丁的心事
 #=================================================
 
-sh_ver="1.0.3"
+sh_ver="1.0.4"
 Timeout="10"
 Test_URL="https://www.bing.com"
 Web_file="/usr/local/SSRStatus"
@@ -734,12 +734,13 @@ http://${server_s}:${server_port_s} {
  root ${Web_file}
  timeouts none
  gzip
-}
+ }
+
 EOF
 			/etc/init.d/caddy restart
 		else
 			echo -e "${Info} 发现 Caddy 配置文件非空，开始追加 ServerStatus 网站配置内容到文件最后..."
-			cat >> "/usr/local/caddy/Caddyfile"<<-EOF默认: 80)
+			cat >> "/usr/local/caddy/Caddyfile"<<-EOF
 http://${server_s}:${server_port_s} {
  root ${Web_file}
  timeouts none
@@ -772,7 +773,6 @@ Install_Web(){
 	Download_SSRStatus
 	echo -e "${Info} 开始配置定时任务..."
 	Set_crontab
-
 	echo -e "${Info} 所有步骤 安装完毕... 请打开本脚本并修改开头的 SSR_folder 变量引号内的ShadowsocksR子目录绝对路径，方可使用。"
 }
 Uninstall_Web(){
@@ -816,9 +816,9 @@ Del_Crontab(){
 	fi
 }
 Update_Shell(){
-	sh_new_ver=$(wget --no-check-certificate -qO- -t1 -T3 "https://raw.githubusercontent.com/2008331828/ssrmenu/master/ssrstatus.sh"|grep 'sh_ver="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1) && sh_new_type="github"
+	sh_new_ver=$(wget --no-check-certificate -qO- -t1 -T3 ""https://raw.githubusercontent.com/2008331828/ssrmenu/master/ssrstatus.sh"|grep 'sh_ver="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1) && sh_new_type="github"
 	[[ -z ${sh_new_ver} ]] && echo -e "${Error} 无法链接到 Github !" && exit 0
-	wget -N --no-check-certificate "https://raw.githubusercontent.com/2008331828/ssrmenu/master/ssrstatus.sh" && chmod +x ssrstatus.sh
+	wget -N --no-check-certificate ""https://raw.githubusercontent.com/2008331828/ssrmenu/master/ssrstatus.sh" && chmod +x ssrstatus.sh
 	echo -e "脚本已更新为最新版本[ ${sh_new_ver} ] !(注意：因为更新方式为直接覆盖当前运行的脚本，所以可能下面会提示一些报错，无视即可)" && exit 0
 }
 menu(){
