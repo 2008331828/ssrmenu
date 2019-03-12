@@ -5,10 +5,10 @@ export PATH
 #=================================================
 #	System Required: CentOS 6+/Debian 6+/Ubuntu 14.04+
 #	Description: Install the ShadowsocksR mudbjson server
-#	Version: 1.1.10"
+#	Version: 1.1.11"
 #	Author: 小布丁的心事
 #=================================================
-sh_ver="1.1.10"
+sh_ver="1.1.11"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 ssr_folder="/usr/local/shadowsocksr"
@@ -1699,14 +1699,16 @@ Update_Shell(){
 web_Monitor_Features ()
 {
 echo && echo -e " 你要做什么？
-${Green_background_prefix}1.${Font_color_suffix} 安装 web 监控
+${Green_background_prefix}1.${Font_color_suffix} 安装 web 监控功能
+${Green_background_prefix}2.${Font_color_suffix} 卸载 web 监控功能
 
 " && echo
 	stty erase '^H' && read -p "(默认: 取消):" web_Monitor_Features_num
 	[[ -z "${web_Monitor_Features_num}" ]] && echo "已取消..." && exit 1
 	if [[ ${web_Monitor_Features_num} == "1" ]]; then
 	install_Web_Monitor
-	
+	elif [[${web_Monitor_Features_num} == "2" ]]; then
+	remove_Web_Monitor
 	else
 		echo -e "${Error} 请输入正确的数字 [1-6]" && exit 1
 	fi
@@ -1715,8 +1717,12 @@ ${Green_background_prefix}1.${Font_color_suffix} 安装 web 监控
 install_Web_Monitor()
 {
 echo -e "开始安装 web 监控功能"
-wget -N --no-check-certificate https://raw.githubusercontent.com/2008331828/ssrmenu/master/ssrstatus.sh && chmod +x ssrstatus.sh
+wget -P /root/  https://raw.githubusercontent.com/2008331828/ssrmenu/master/ssrstatus.sh && chmod +x ssrstatus.sh
+}
 
+remove_Web_Monitor()
+{
+echo -e "正在开发中，请等下一版本。。。"
 }
 
 
