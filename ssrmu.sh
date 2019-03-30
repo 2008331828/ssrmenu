@@ -5,10 +5,10 @@ export PATH
 #=================================================
 #	System Required: CentOS 6+/Debian 6+/Ubuntu 14.04+
 #	Description: Install the ShadowsocksR mudbjson server
-#	Version: 1.1.11"
+#	Version: 1.1.12"
 #	Author: 小布丁的心事
 #=================================================
-sh_ver="1.1.11"
+sh_ver="1.1.12"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 ssr_folder="/usr/local/shadowsocksr"
@@ -1743,19 +1743,6 @@ menu_status(){
 	fi
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 check_sys
 [[ ${release} != "debian" ]] && [[ ${release} != "ubuntu" ]] && [[ ${release} != "centos" ]] && echo -e "${Error} 本脚本不支持当前系统 ${release} !" && exit 1
 action=$1
@@ -1769,13 +1756,14 @@ else
   ${Green_font_prefix} 2.${Font_color_suffix} 查看 账号信息
   ${Green_font_prefix} 3.${Font_color_suffix} 显示 连接信息
   ${Green_font_prefix} 4.${Font_color_suffix} 设置 用户配置
-  ${Green_font_prefix} 5.${Font_color_suffix} 手动 修改配置
-  ${Green_font_prefix} 6.${Font_color_suffix} 清零 已用流量
-  ${Green_font_prefix} 7.${Font_color_suffix} 启动 ShadowsocksR
-  ${Green_font_prefix} 8.${Font_color_suffix} 重启 ShadowsocksR
-  ${Green_font_prefix} 9.${Font_color_suffix} 查看 ShadowsocksR 日志
-  ${Green_font_prefix}10.${Font_color_suffix} 其他功能
-  ${Green_font_prefix}11.${Font_color_suffix} 升级脚本
+  ${Green_font_prefix} 5.${Font_color_suffix} 手动 修改配置  
+  ${Green_font_prefix} 6.${Font_color_suffix} 查看用户流量
+  ${Green_font_prefix} 7.${Font_color_suffix} 清零 已用流量
+  ${Green_font_prefix} 8.${Font_color_suffix} 启动 ShadowsocksR
+  ${Green_font_prefix} 9.${Font_color_suffix} 重启 ShadowsocksR
+  ${Green_font_prefix}10.${Font_color_suffix} 查看 ShadowsocksR 日志
+  ${Green_font_prefix}11.${Font_color_suffix} 其他功能
+  ${Green_font_prefix}12.${Font_color_suffix} 升级脚本
  "
 	menu_status
 	echo && stty erase '^H' && read -p "请输入数字 [1-15]：" num
@@ -1796,21 +1784,23 @@ case "$num" in
 	Clear_transfer
 	;;
 	6)
+	View_user_connection_info
+	7)
 	Start_SSR
 	;;
-	7)
+	8)
 	Stop_SSR
 	;;
-	8)
+	9)
 	Restart_SSR
 	;;
-	9)
+	10)
 	View_Log
 	;;
-	10)
+	11)
 	Other_functions
 	;;
-	11)
+	12)
 	Update_Shell
 	;;
 	*)
