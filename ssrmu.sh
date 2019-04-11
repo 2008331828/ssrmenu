@@ -5,10 +5,10 @@ export PATH
 #=================================================
 #	System Required: CentOS 6+/Debian 6+/Ubuntu 14.04+
 #	Description: Install the ShadowsocksR mudbjson server
-#	Version: 1.1.13"
+#	Version: 1.1.14"
 #	Author: 小布丁的心事
 #=================================================
-sh_ver="1.1.13"
+sh_ver="1.1.14"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 ssr_folder="/usr/local/shadowsocksr"
@@ -1725,9 +1725,6 @@ remove_Web_Monitor()
 echo -e "正在开发中，请等下一版本。。。"
 }
 
-
-
-
 # 显示 菜单状态
 menu_status(){
 	if [[ -e ${ssr_folder} ]]; then
@@ -1757,13 +1754,12 @@ else
   ${Green_font_prefix} 3.${Font_color_suffix} 显示 连接信息
   ${Green_font_prefix} 4.${Font_color_suffix} 设置 用户配置
   ${Green_font_prefix} 5.${Font_color_suffix} 手动 修改配置  
-  ${Green_font_prefix} 6.${Font_color_suffix} 查看用户流量
-  ${Green_font_prefix} 7.${Font_color_suffix} 清零 已用流量
-  ${Green_font_prefix} 8.${Font_color_suffix} 启动 ShadowsocksR
-  ${Green_font_prefix} 9.${Font_color_suffix} 重启 ShadowsocksR
-  ${Green_font_prefix}10.${Font_color_suffix} 查看 ShadowsocksR 日志
-  ${Green_font_prefix}11.${Font_color_suffix} 其他功能
-  ${Green_font_prefix}12.${Font_color_suffix} 升级脚本
+  ${Green_font_prefix} 6.${Font_color_suffix} 清零 已用流量
+  ${Green_font_prefix} 7.${Font_color_suffix} 启动 ShadowsocksR
+  ${Green_font_prefix} 8.${Font_color_suffix} 重启 ShadowsocksR
+  ${Green_font_prefix} 9.${Font_color_suffix} 查看 ShadowsocksR 日志
+  ${Green_font_prefix}10.${Font_color_suffix} 其他功能
+  ${Green_font_prefix}11.${Font_color_suffix} 升级脚本
  "
 	menu_status
 	echo && stty erase '^H' && read -p "请输入数字 [1-15]：" num
@@ -1781,27 +1777,24 @@ case "$num" in
 	Modify_Config
 	;;
 	5)
-	Clear_transfer
+	Clear_transfe
 	;;
 	6)
-	View_user_connection_info
-	;;
-	7)
 	Start_SSR
 	;;
-	8)
+	7)
 	Stop_SSR
 	;;
-	9)
+	8)
 	Restart_SSR
 	;;
-	10)
+	9)
 	View_Log
 	;;
-	11)
+	10)
 	Other_functions
 	;;
-	12)
+	11)
 	Update_Shell
 	;;
 	*)
