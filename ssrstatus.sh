@@ -5,11 +5,11 @@ export PATH
 #=================================================
 #	System Required: CentOS 6+/Debian 7+/Ubuntu 14.04+
 #	Description: ShadowsocksR Status
-#	Version: 1.0.5
+#	Version: 1.0.6
 #	Author: 小布丁的心事
 #=================================================
 
-sh_ver="1.0.5"
+sh_ver="1.0.6"
 Timeout="10"
 Test_URL="https://www.bing.com"
 Web_file="/usr/local/SSRStatus"
@@ -19,6 +19,7 @@ file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 log_file="${file}/ssr_status.log"
 config_file="${file}/ssr_status.conf"
 JSON_file="/usr/local/SSRStatus/json/stats.json"
+shadowsocksDB_file="/usr/local/shadowsocks/mudb.json"
 
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}" && Error="${Red_font_prefix}[错误]${Font_color_suffix}" && Tip="${Green_font_prefix}[注意]${Font_color_suffix}"
