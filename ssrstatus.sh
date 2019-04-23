@@ -5,11 +5,11 @@ export PATH
 #=================================================
 #	System Required: CentOS 6+/Debian 7+/Ubuntu 14.04+
 #	Description: ShadowsocksR Status
-#	Version: 1.0.6
+#	Version: 1.0.7
 #	Author: 小布丁的心事
 #=================================================
 
-sh_ver="1.0.6"
+sh_ver="1.0.7"
 Timeout="10"
 Test_URL="https://www.bing.com"
 Web_file="/usr/local/SSRStatus"
@@ -772,6 +772,8 @@ Install_Web(){
 	Install_caddy
 	echo -e "${Info} 开始下载/安装..."
 	Download_SSRStatus
+	echo -e "${Info} 开始安装JQ"
+	yum install jq -y
 	echo -e "${Info} 开始配置定时任务..."
 	Set_crontab
 	echo -e "${Info} 所有步骤 安装完毕... 请打开本脚本并修改开头的 SSR_folder 变量引号内的ShadowsocksR子目录绝对路径，方可使用。"
