@@ -5,11 +5,11 @@ export PATH
 #=================================================
 #	System Required: CentOS 6+/Debian 7+/Ubuntu 14.04+
 #	Description: ShadowsocksR Status
-#	Version: 1.0.7
+#	Version: 1.0.8
 #	Author: 小布丁的心事
 #=================================================
 
-sh_ver="1.0.7"
+sh_ver="1.0.8"
 Timeout="10"
 Test_URL="https://www.bing.com"
 Web_file="/usr/local/SSRStatus"
@@ -321,9 +321,9 @@ Continue_if(){
 	Config_Status="false"
 	[[ -z ${ip} ]] && ip="---.---.---.---"
 	if [[ ${Like_num} == ${integer} ]]; then
-		Config_JSON="${Config_JSON}{ \"ip\": \"${ip}\", \"name\": \"${Config_Name}\", \"type\": \"${Config_Type}\", \"type_1\": \"${Config_Type_1}\", \"location\": \"${Config_Location}\", \"status\": ${Config_Status}, \"time\": \"$(date '+%Y-%m-%d %H:%M:%S')\"  }\n"
+		#Config_JSON="${Config_JSON}{ \"ip\": \"${ip}\", \"name\": \"${Config_Name}\", \"type\": \"${Config_Type}\", \"type_1\": \"${Config_Type_1}\", \"location\": \"${Config_Location}\", \"status\": ${Config_Status}, \"time\": \"$(date '+%Y-%m-%d %H:%M:%S')\"  }\n"
 	else
-		Config_JSON="${Config_JSON}{ \"ip\": \"${ip}\", \"name\": \"${Config_Name}\", \"type\": \"${Config_Type}\", \"type_1\": \"${Config_Type_1}\", \"location\": \"${Config_Location}\", \"status\": ${Config_Status}, \"time\": \"$(date '+%Y-%m-%d %H:%M:%S')\"  },\n"
+		#Config_JSON="${Config_JSON}{ \"ip\": \"${ip}\", \"name\": \"${Config_Name}\", \"type\": \"${Config_Type}\", \"type_1\": \"${Config_Type_1}\", \"location\": \"${Config_Location}\", \"status\": ${Config_Status}, \"time\": \"$(date '+%Y-%m-%d %H:%M:%S')\"  },\n"
 	fi
 	continue
 }
